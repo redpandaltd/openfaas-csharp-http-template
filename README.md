@@ -26,6 +26,19 @@ namespace OpenFaaS
 
 This is just an example. You can now start implementing your function.
 
+If you want to restrict function execution to a particular HTTP method (or methods) you can decorate `HandleAsync` with HTTP method attributes.
+
+```csharp
+public class Function : HttpFunction
+{
+    [HttpPost]
+    public override Task<IActionResult> HandleAsync( HttpRequest request )
+    {
+        // this will only execute with a POST method
+    }
+}
+```
+
 You can also implement only a specific HTTP method (or multiple, each with its own logic) if you want. Instead of overriding the public method `HandleAsync`, override the protected methods `HandleGetAsync` or `HandlePostAsync` for example.
 
 ``` csharp
