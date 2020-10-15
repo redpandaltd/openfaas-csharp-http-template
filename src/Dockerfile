@@ -26,7 +26,7 @@ RUN dotnet restore ./root.csproj
 WORKDIR /home/app/src
 COPY .  .
 
-RUN dotnet publish -c release -o published
+RUN dotnet publish -c release -o published ./root/root.csproj
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
 
