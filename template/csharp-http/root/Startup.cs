@@ -68,8 +68,29 @@ namespace template
                 {
                     IHttpFunction function = new OpenFaaS.Function();
 
+                    // get function http modifiers
+                    var methodInfo = typeof( OpenFaaS.Function ).GetMethod( "HandleAsync" );
+                    var httpAttributes = methodInfo.GetCustomAttributes( typeof(Microsoft.AspNetCore.Mvc.Routing.HttpMethodAttribute ), false );
+
+                    if ( httpAttributes.Any() )
+                    {
+                        // we have http modifiers, let's match with the request method
+                        var attributeName = $"http{context.Request.Method}attribute";
+
+                        if ( !httpAttributes.Any( x => x.GetType().Name.Equals( attributeName, StringComparison.OrdinalIgnoreCase ) ) )
+                        {
+                            // method not allowed
+                            context.Response.StatusCode = 405;
+
+                            await context.Response.WriteAsync( "405" );
+                            return;                
+                        }
+                    }
+
+                    // execute function
                     var result = await function.HandleAsync( context.Request );
 
+                    // write result
                     var actionContext = new ActionContext( context, new RouteData(), new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor() );
 
                     await result.ExecuteResultAsync( actionContext );
