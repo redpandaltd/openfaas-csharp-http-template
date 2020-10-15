@@ -1,5 +1,5 @@
 .vscode/*
-template/*/obj/*
-template/*/bin/*
-template/.vs/*
-template/*/*.csproj.user
+template/**/obj/*
+template/**/bin/*
+template/**/.vs/*
+template/**/*.csproj.user
