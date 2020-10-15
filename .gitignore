@@ -1,0 +1,5 @@
+.vscode/*
+src/*/obj/*
+src/*/bin/*
+src/.vs/*
+src/*/*.csproj.user
