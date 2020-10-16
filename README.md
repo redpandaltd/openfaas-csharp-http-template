@@ -2,7 +2,21 @@
 
 This template for OpenFaaS makes use of ASP.NET Core. This allows more control over the request (by providing an `HttpRequest` instance) and better handling of the response by returning an `IActionResult`.
 
+## Installing the template
+
+Just pull the template with the faas CLI.
+
+```bash
+faas-cli template pull https://github.com/redpandaltd/openfaas-csharp-http-template
+```
+
 ## Using the template
+
+After installing the template, create a new function with the `csharp-http` template.
+
+```bash
+faas-cli new --lang csharp-http <function-name>
+```
 
 A file named `Function.cs` is generated when you create a new function with this template. In this file is a class named `Function` that implements `HttpFunction`. This is what it looks like:
 
