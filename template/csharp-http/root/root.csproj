@@ -5,10 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\function\Function.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.9" />
+    <PackageReference Include="Redpanda.OpenFaaS.Http" Version="0.1.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Redpanda.OpenFaaS.Http" Version="0.1.0" />
+    <ProjectReference Include="..\function\Function.csproj" />
   </ItemGroup>
 </Project>

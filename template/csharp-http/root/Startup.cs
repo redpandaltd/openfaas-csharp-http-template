@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Serialization;
 using Redpanda.OpenFaaS;
 
 namespace template
@@ -39,11 +40,12 @@ namespace template
             } );
 
             services.AddMvc()
-                .AddJsonOptions( options =>
+                .AddNewtonsoftJson( options =>
                 {
-                    options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-                    options.JsonSerializerOptions.IgnoreNullValues = true;
+                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                    options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
                 } );
+            // Replaced with Newtonsoft because Microsoft's serializer doesn't do polymorphic serialization
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,14 +56,15 @@ namespace template
                 app.UseDeveloperExceptionPage();
             }
 
-            app.Run( async context => {
+            app.Run( async context =>
+            {
 
                 if ( context.Request.Path != "/" )
                 {
                     context.Response.StatusCode = 404;
 
                     await context.Response.WriteAsync( "404" );
-                    return;                
+                    return;
                 }
 
                 try
@@ -70,7 +73,7 @@ namespace template
 
                     // get function http modifiers
                     var methodInfo = typeof( OpenFaaS.Function ).GetMethod( "HandleAsync" );
-                    var httpAttributes = methodInfo.GetCustomAttributes( typeof(Microsoft.AspNetCore.Mvc.Routing.HttpMethodAttribute ), false );
+                    var httpAttributes = methodInfo.GetCustomAttributes( typeof( Microsoft.AspNetCore.Mvc.Routing.HttpMethodAttribute ), false );
 
                     if ( httpAttributes.Any() )
                     {
@@ -83,7 +86,7 @@ namespace template
                             context.Response.StatusCode = 405;
 
                             await context.Response.WriteAsync( "405" );
-                            return;                
+                            return;
                         }
                     }
 
