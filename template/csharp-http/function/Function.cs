@@ -7,6 +7,8 @@ namespace OpenFaaS
 {
     public class Function : HttpFunction
     {
+        [HttpGet]
+        [HttpPost]
         public override Task<IActionResult> HandleAsync( HttpRequest request )
         {
             var result = new
