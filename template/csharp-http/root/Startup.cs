@@ -47,6 +47,7 @@ namespace template
                 } );
             // Replaced with Newtonsoft because Microsoft's serializer doesn't do polymorphic serialization
 
+            services.AddTransient<IHttpFunction, OpenFaaS.Function>();
             services.AddHttpClient();
         }
 
@@ -60,7 +61,6 @@ namespace template
 
             app.Run( async context =>
             {
-
                 if ( context.Request.Path != "/" )
                 {
                     context.Response.StatusCode = 404;
@@ -71,7 +71,7 @@ namespace template
 
                 try
                 {
-                    IHttpFunction function = new OpenFaaS.Function();
+                    var function = app.ApplicationServices.GetService<IHttpFunction>();
 
                     // get function http modifiers
                     var methodInfo = typeof( OpenFaaS.Function ).GetMethod( "HandleAsync" );
