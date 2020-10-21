@@ -46,6 +46,8 @@ namespace template
                     options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
                 } );
             // Replaced with Newtonsoft because Microsoft's serializer doesn't do polymorphic serialization
+
+            services.AddHttpClient();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
