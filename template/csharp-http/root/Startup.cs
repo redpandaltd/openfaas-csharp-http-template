@@ -47,8 +47,8 @@ namespace template
                 } );
             // Replaced with Newtonsoft because Microsoft's serializer doesn't do polymorphic serialization
 
-            services.AddTransient<IHttpFunction, OpenFaaS.Function>();
-            services.AddHttpClient();
+            // allow function implementation to add services to the container
+            new OpenFaaS.Startup().ConfigureServices( services );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
