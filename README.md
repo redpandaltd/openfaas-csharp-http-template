@@ -76,3 +76,60 @@ namespace OpenFaaS
 ```
 
 When we use this, all methods that are not handled return a 405.
+
+## Dependency Injection
+
+The template supports the dependency injection design pattern. To allow you to extend this, you can configure additional services in the `Startup.cs` file with the `ConfigureServices` method. This is how the generated file looks like.
+
+```csharp
+namespace OpenFaaS
+{
+    public class Startup
+    {
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices( IServiceCollection services )
+        {
+            services.AddTransient<IHttpFunction, Function>();
+
+            // add your services here.
+        }
+    }
+}
+```
+
+As an example, let's consider we want to make `IHttpClientFactory` accessible on our function, because we want to instantiate `HttpClient` safely inside our function. We configure the container as we would on an ASP.NET or .NET Core application.
+
+```csharp
+public void ConfigureServices( IServiceCollection services )
+{
+    services.AddTransient<IHttpFunction, Function>();
+
+    // add your services here.
+    services.AddHttpClient();
+}
+```
+
+The above requires adding the package `Microsoft.Extensions.Http` to the project.
+
+Then we simply inject `IHttpClientFactory` on our function and let the runtime do the rest.
+
+```csharp
+public class Function : HttpFunction
+{
+    private readonly IHttpClientFactory clientFactory;
+
+    public Function( IHttpClientFactory httpClientFactory )
+    {
+        clientFactory = httpClientFactory;
+    }
+
+    [HttpGet]
+    [HttpPost]
+    public override async Task<IActionResult> HandleAsync( HttpRequest request )
+    {
+        var httpClient = clientFactory.CreateClient();
+
+        ...
+    }
+}
+```
