@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Redpanda.OpenFaaS;
 using System;
 using System.Collections.Generic;
@@ -14,17 +15,20 @@ namespace root
     internal class HttpRequestHandler
     {
         private readonly IHttpFunction function;
+        private readonly HttpFunctionOptions options;
         private readonly ILogger log;
 
-        public HttpRequestHandler( ILoggerFactory loggerFactory, IHttpFunction httpFunction )
+        public HttpRequestHandler( ILoggerFactory loggerFactory, IHttpFunction httpFunction, IOptions<HttpFunctionOptions> optionsAccessor )
         {
             log = loggerFactory.CreateLogger<HttpRequestHandler>();
             function = httpFunction;
+            options = optionsAccessor.Value;
         }
 
         public async Task HandleAsync( HttpContext context )
         {
-            if ( context.Request.Path != "/" )
+            // reject path unless allowed
+            if ( !options.AllowCustomPath && ( context.Request.Path != "/" ) )
             {
                 context.Response.StatusCode = 404;
 
