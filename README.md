@@ -133,3 +133,35 @@ public class Function : HttpFunction
     }
 }
 ```
+
+## Route templates
+
+Route templates are supported through HTTP method attributes. When used, the route template values are injected on the `RouteData`.
+
+```csharp
+public class Function : HttpFunction
+{
+    [HttpGet( "{id}" )]
+    public override Task<IActionResult> HandleAsync( HttpRequest request )
+    {
+        var id = request.HttpContext.GetRouteValue( "id" );
+    }
+}
+```
+
+## Manual route handling
+
+By default, only root path or route templates are accepted by the handler. Everything else throws back a 404 response. If we want to bypass this and handle the routes on the function, we can enable `AllowCustomPath` in the options, when configuring our function in the `Startup.cs` file.
+
+```csharp
+public void ConfigureServices( IServiceCollection services )
+{
+    services.AddTransient<IHttpFunction, Function>();
+
+    // add your services here.
+    services.Configure<HttpFunctionOptions>( options =>
+    {
+        options.AllowCustomPath = true;
+    } );
+}
+```
