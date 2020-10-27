@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Redpanda.OpenFaaS;
 using System;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace OpenFaaS
         {
             var result = new
             {
-                Message = "Hello!"
+                Message = $"Hello!"
             };
 
             return Task.FromResult( Ok( result ) );

@@ -48,6 +48,7 @@ namespace template
             new OpenFaaS.Startup().ConfigureServices( services );
 
             // add root request handler to the container
+            services.AddSingleton<IRouteMatcher, RouteMatcher>();
             services.AddTransient<HttpRequestHandler>();
         }
 
