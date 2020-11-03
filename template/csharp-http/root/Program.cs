@@ -20,8 +20,14 @@ namespace template
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseKestrel().UseStartup<Startup>()
-                    .UseUrls( "http://localhost:5000" );
+                    webBuilder.UseKestrel().UseStartup<Startup>();
+
+                    webBuilder.ConfigureAppConfiguration( configBuilder =>
+                    {
+                        configBuilder.AddEnvironmentVariables();
+                    } );
+
+                    webBuilder.UseUrls( "http://localhost:5000" );
                 });
     }
 }
