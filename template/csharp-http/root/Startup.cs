@@ -45,7 +45,7 @@ namespace template
             // Replaced with Newtonsoft because Microsoft's serializer doesn't do polymorphic serialization
 
             // allow function implementation to add services to the container
-            new OpenFaaS.Startup().ConfigureServices( services );
+            new OpenFaaS.Startup( Configuration ).ConfigureServices( services );
 
             // add root request handler to the container
             services.AddSingleton<IRouteMatcher, RouteMatcher>();
