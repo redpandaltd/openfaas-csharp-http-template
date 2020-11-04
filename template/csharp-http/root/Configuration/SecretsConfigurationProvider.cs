@@ -7,15 +7,20 @@ namespace Microsoft.Extensions.Configuration.OpenFaaSSecrets
     {
         public override void Load()
         {
-            var secrets = Directory.GetFiles( "/var/openfaas/secrets/" );
-
-            foreach ( var secret in secrets )
+            try
             {
-                var secretName = string.Concat( "openfaas_secret_", Path.GetFileName( secret ) );
-                var secretValue = File.ReadAllBytes( secret );
+                var secrets = Directory.GetFiles( "/var/openfaas/secrets/" );
 
-                Data.Add( secretName, Convert.ToBase64String( secretValue ) );
+                foreach ( var secret in secrets )
+                {
+                    var secretName = string.Concat( "openfaas_secret_", Path.GetFileName( secret ) );
+                    var secretValue = File.ReadAllBytes( secret );
+
+                    Data.Add( secretName, Convert.ToBase64String( secretValue ) );
+                }
             }
+            catch ( Exception )
+            { }
         }
     }
 }
