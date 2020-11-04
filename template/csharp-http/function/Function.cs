@@ -14,7 +14,7 @@ namespace OpenFaaS
         {
             var result = new
             {
-                Message = $"Hello!"
+                Message = "Hello!"
             };
 
             return Task.FromResult( Ok( result ) );
