@@ -16,18 +16,19 @@ namespace template
             CreateHostBuilder(args).Build().Run();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
+        public static IHostBuilder CreateHostBuilder( string[] args) =>
+            Host.CreateDefaultBuilder( args )
+                .ConfigureWebHostDefaults( webBuilder =>
                 {
-                    webBuilder.UseKestrel().UseStartup<Startup>();
-
                     webBuilder.ConfigureAppConfiguration( configBuilder =>
                     {
                         configBuilder.AddEnvironmentVariables();
+                        configBuilder.AddOpenFaaSSecrets();
                     } );
 
-                    webBuilder.UseUrls( "http://localhost:5000" );
-                });
+                    webBuilder.UseKestrel()
+                        .UseStartup<Startup>()
+                        .UseUrls( "http://localhost:5000" );
+                } );
     }
 }
