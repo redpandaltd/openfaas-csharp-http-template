@@ -134,6 +134,16 @@ public class Function : HttpFunction
 }
 ```
 
+## Configuration
+
+The template also exposes ASPNET Core's configuration model. The `Startup.cs` file contains an `IConfiguration` instance that is populated with environment variables and OpenFaaS secrets.
+
+### OpenFaaS Secrets
+
+Secrets that the function has access to are also loaded into the configuration model. They are prepended with the prefix `openfaas_secret_`. For example, a secret named `my-secret-key` can be accessed with the configuration key `openfaas_secret_my-secret-key`.
+
+NOTE: The value of the secret is read as a byte array and the stored as a base64 string.
+
 ## Route templates
 
 Route templates are supported through HTTP method attributes. When used, the route template values are injected on the `RouteData`.
