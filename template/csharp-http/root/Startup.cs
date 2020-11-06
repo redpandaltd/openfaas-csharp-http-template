@@ -1,9 +1,11 @@
 using System;
 using System.Linq;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
@@ -44,12 +46,15 @@ namespace template
                 } );
             // Replaced with Newtonsoft because Microsoft's serializer doesn't do polymorphic serialization
 
+            services.AddSingleton<ISystemClock, SystemClock>();
+
             // allow function implementation to add services to the container
             new OpenFaaS.Startup( Configuration ).ConfigureServices( services );
 
             // add root request handler to the container
             services.AddSingleton<IRouteMatcher, RouteMatcher>();
             services.AddTransient<HttpRequestHandler>();
+            services.TryAddScoped<HttpAuthenticationHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

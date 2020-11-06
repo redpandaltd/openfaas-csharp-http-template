@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Redpanda.OpenFaaS;
@@ -20,7 +23,8 @@ namespace root
         public HttpRequestHandler( ILoggerFactory loggerFactory
             , IHttpFunction httpFunction
             , IOptions<HttpFunctionOptions> optionsAccessor
-            , IRouteMatcher internalRouteMatcher )
+            , IRouteMatcher internalRouteMatcher
+            )
         {
             log = loggerFactory.CreateLogger<HttpRequestHandler>();
             function = httpFunction;
@@ -32,46 +36,27 @@ namespace root
         {
             try
             {
-                // get function http modifiers
-                var httpAttributes = function.GetHttpMethodAttributes();
-
-                if ( httpAttributes.Any() )
+                // look for http modifiers and verify they match the request
+                if ( !await MatchHttpAttributesAsync( context ) )
                 {
-                    // we have http modifiers, let's match with the request method
-                    var httpAttribute = httpAttributes.GetMethod( context.Request.Method );
-
-                    if ( httpAttribute == null )
-                    {
-                        // method not allowed
-                        await WriteMethodNotAllowedAsync( context );
-
-                        return;
-                    }
-
-                    if ( !string.IsNullOrEmpty( httpAttribute.Template ) )
-                    {
-                        // match route template
-                        if ( !httpAttribute.MatchRouteTemplate( context, routeMatcher ) )
-                        {
-                            // path doesn't match route template
-                            await WriteNotFoundAsync( context );
-
-                            return;
-                        }
-
-                    }
-                    else if ( !options.AllowCustomPath && ( context.Request.Path != "/" ) )
-                    {
-                        // attribute template is null. reject custom path unless allowed by options
-                        await WriteNotFoundAsync( context );
-
-                        return;
-                    }
+                    return;
                 }
-                else if ( !options.AllowCustomPath && ( context.Request.Path != "/" ) )
+
+                using ( var scope = context.RequestServices.CreateScope() )
                 {
-                    // if there are no http modifiers, we reject a custom path unless allowed by options
-                    await WriteNotFoundAsync( context );
+                    var authenticationHandler = scope.ServiceProvider.GetService<HttpAuthenticationHandler>();
+
+                    await authenticationHandler.AuthenticateAsync( context );
+                }
+
+                // enforce authorization when required
+                var authAttributes = function.GetAuthorizeAttributes();
+
+                if ( function.GetAuthorizeAttributes().Any() && !context.User.Identity.IsAuthenticated )
+                {
+                    context.Response.StatusCode = 401;
+
+                    await context.Response.WriteAsync( "Unauthorized" );
 
                     return;
                 }
@@ -92,6 +77,55 @@ namespace root
             {
                 await WriteExceptionAsync( context, ex );
             }
+        }
+
+        private async Task<bool> MatchHttpAttributesAsync( HttpContext context )
+        {
+            // get function http modifiers
+            var httpAttributes = function.GetHttpMethodAttributes();
+
+            if ( httpAttributes.Any() )
+            {
+                // we have http modifiers, let's match with the request method
+                var httpAttribute = httpAttributes.GetMethod( context.Request.Method );
+
+                if ( httpAttribute == null )
+                {
+                    // method not allowed
+                    await WriteMethodNotAllowedAsync( context );
+
+                    return ( false );
+                }
+
+                if ( !string.IsNullOrEmpty( httpAttribute.Template ) )
+                {
+                    // match route template
+                    if ( !httpAttribute.MatchRouteTemplate( context, routeMatcher ) )
+                    {
+                        // path doesn't match route template
+                        await WriteNotFoundAsync( context );
+
+                        return ( false );
+                    }
+
+                }
+                else if ( !options.AllowCustomPath && ( context.Request.Path != "/" ) )
+                {
+                    // attribute template is null. reject custom path unless allowed by options
+                    await WriteNotFoundAsync( context );
+
+                    return ( false );
+                }
+            }
+            else if ( !options.AllowCustomPath && ( context.Request.Path != "/" ) )
+            {
+                // if there are no http modifiers, we reject a custom path unless allowed by options
+                await WriteNotFoundAsync( context );
+
+                return ( false );
+            }
+
+            return ( true );
         }
 
         private Task WriteNotFoundAsync( HttpContext context )
