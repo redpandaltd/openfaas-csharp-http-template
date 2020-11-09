@@ -144,6 +144,8 @@ Secrets that the function has access to are also loaded into the configuration m
 
 NOTE: The value of the secret is read as a byte array and the stored as a base64 string.
 
+You can also use the extension methods `GetSecret` and `GetSecretAsString` by installing [Redpanda.OpenFaaS.Extensions.Configuration](https://www.nuget.org/packages/Redpanda.OpenFaaS.Extensions.Configuration/). You can read more [here](https://github.com/redpandaltd/openfaas-configuration-extensions/blob/master/README.md).
+
 ## Route templates
 
 Route templates are supported through HTTP method attributes. When used, the route template values are injected on the `RouteData`.
@@ -175,3 +177,25 @@ public void ConfigureServices( IServiceCollection services )
     } );
 }
 ```
+
+## Authentication and Authorization
+
+It is possible to use ASPNET Core's authentication pipeline. Furthermore, the `Authorize` attribute is allowed in the function class and will return a 401 unless the user is authenticated.
+
+```csharp
+namespace OpenFaaS
+{
+    [Authorize]
+    public class Function : HttpFunction
+    {
+        ...
+    }
+}
+```
+
+## Extensions
+
+|Name|Description|
+|---|---|
+|API Key Secret Authentication|Provides an API Key authentication based on an OpenFaaS secret. Available on [NuGet](https://www.nuget.org/packages/Redpanda.OpenFaaS.Extensions.Authentication/). Read more [here](https://github.com/redpandaltd/openfaas-authentication-extensions/blob/master/README.md).|
+|Configuration|Configuration extensions. Available on [NuGet](https://www.nuget.org/packages/Redpanda.OpenFaaS.Extensions.Configuration/). You can read more [here](https://github.com/redpandaltd/openfaas-configuration-extensions/blob/master/README.md).|
