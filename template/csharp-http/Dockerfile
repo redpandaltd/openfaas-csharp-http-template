@@ -1,6 +1,6 @@
 FROM openfaas/of-watchdog:0.8.1 as watchdog
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 as builder
+FROM mcr.microsoft.com/dotnet/sdk:5.0 as builder
 
 # Supress collection of data.
 ENV DOTNET_CLI_TELEMETRY_OPTOUT 1
@@ -21,7 +21,7 @@ COPY .  .
 
 RUN dotnet publish -c release -o published ./root/root.csproj
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
+FROM mcr.microsoft.com/dotnet/aspnet:5.0
 
 COPY --from=watchdog /fwatchdog /usr/bin/
 
